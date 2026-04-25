@@ -580,6 +580,9 @@ async def checkout_status(session_id: str, user = Depends(get_user)):
     try:
         st = await stripe_checkout.get_checkout_status(session_id)
     except Exception as e:
+        msg = str(e).lower()
+        if "no such" in msg or "resource_missing" in msg or "not found" in msg:
+            return {"payment_status": "pending", "status": "pending", "plan": tx["plan"], "amount": 0}
         logger.error(f"Stripe status failed: {e}")
         raise HTTPException(500, "Vérification impossible")
 
