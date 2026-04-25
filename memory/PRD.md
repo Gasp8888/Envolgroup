@@ -1,60 +1,66 @@
 # Envol - PRD
 
 ## Original Problem Statement (FR)
-Plateforme d'incubation Envol pour 15-25 ans. **Phase 1** (Jan 2026) : sidebar 8 items + bulle IA + onboarding 10 questions avec analyse Claude (score, points forts/vigilance/négatifs/améliorations). **Phase 2** (Jan 2026) : design premium V2, cockpit complet (post-its, calendrier, statut projet, sparkline), Mon projet enrichi (pitch/objectifs/roadmap), Profil & Documents (upload), Espace Admin sécurisé, Stripe abonnements 3 tiers avec gating de features.
+Plateforme d'incubation Envol pour 15-25 ans. Phase 1 : MVP avec sidebar 8 items + bulle IA + onboarding 10 questions Claude. Phase 2 : design premium, cockpit, post-its, projet enrichi, documents, admin, Stripe. **Phase 3** (Jan 2026) : logo Envol intégré, 2e admin Gaspard, "Qui sommes-nous", animations CountUp+Reveal, lucide-react icons, photo de profil, reset password, vraies vidéos formations, calendrier full-month, toasts.
 
 ## Architecture
-- **Frontend** : React (CRA + craco), modular files (App / Landing / Onboarding / Dashboard / Admin / api), axios, design or/lavande/dark (Fraunces + Outfit fonts)
-- **Backend** : FastAPI + MongoDB (motor) + JWT + bcrypt + emergentintegrations (Claude + Stripe)
-- **AI** : Claude Sonnet 4.5 (anthropic claude-sonnet-4-5-20250929) via Emergent LLM Key
-- **Payments** : Stripe TEST mode (sk_test_emergent) via emergentintegrations.payments.stripe.checkout
-- **Storage** : MongoDB collections (users, onboardings, projects, postits, events, resources, documents, payment_transactions) + local filesystem `/app/backend/uploads/<user_id>/`
+- **Frontend** : React, axios, lucide-react icons, fonts Fraunces + Outfit, design or/lavande/dark
+- **Backend** : FastAPI + MongoDB + JWT + bcrypt + emergentintegrations (Claude + Stripe)
+- **Storage** : MongoDB (users, onboardings, projects, postits, events, resources, documents, payment_transactions, password_resets) + filesystem `/app/backend/uploads/<user_id>/`
+- **AI** : Claude Sonnet 4.5 via Emergent LLM Key
+- **Payments** : Stripe TEST mode
 
-## User Personas
-- Jeune entrepreneur 15-25 ans (de l'idée au lancement)
-- Admin Envol (Léo, Gaspard) qui gère contenus, événements, post-its
+## Implementation status
 
-## What's been implemented
-
-### Phase 1 (initial MVP)
-- [x] Auth: register/login/JWT, bcrypt, /api/auth/me
-- [x] Landing avec orbes lumineuses, hero, features
-- [x] Onboarding 10 questions → Claude → analyse JSON + score/100
-- [x] AnalysisResult: cercle animé + 4 sections colorées (vert/orange/rouge/or)
-- [x] Dashboard 8 items: Vue d'ensemble · Formations · Checklist · Mon projet · Suivi & Experts · Ressources · Chat · Mon profil
-- [x] AI Bubble (Claude) flottante
+### Phase 1 (MVP)
+- [x] Auth JWT + bcrypt, register/login, /auth/me
+- [x] Landing avec orbes, hero, features
+- [x] Onboarding 10 questions → Claude → analyse JSON + score/100 + 4 sections
+- [x] Dashboard 8 items: Vue d'ensemble · Formations · Missions · Mon projet · Suivi & Experts · Ressources · Chat · Mon profil
+- [x] AI Bubble Claude flottante
 
 ### Phase 2 (extension)
-- [x] **Landing V2 premium** : hero impactant, features-grid 8 cards, pricing 3 tiers, footer
-- [x] **Cockpit Vue d'ensemble** : score circle + sparkline (historique scores), status stepper 4 étapes (Idée/Développement/Lancement/Croissance), grille de post-its (or admin / bleu user), liste calendrier événements à venir, progression formation, prochaine étape IA
-- [x] **Post-its système** : POST/GET/DELETE /api/postits, badge "Nouveau" sur post-its admin non lus, mark-read au clic, post-its admin = doré, post-its user = bleu
-- [x] **Mon projet enrichi** : pitch (textarea), statut (segmented control), objectifs (liste add/remove), roadmap (phases avec timeline), persisté via /api/project
-- [x] **Profil sub-tabs** : "Profil & Projet" (info utilisateur + résumé projet) + "Documents" (upload par catégorie, prévisualisation, download, delete) — stockage local
-- [x] **Formations parcours** : path linéaire avec lock par plan (Silver+ pour modules 4-5)
-- [x] **Missions** (ex-Checklist) : XP/niveau, missions IA + génériques, progress bar
-- [x] **Espace Admin** : seeded admin@envol.com / admin2026 (Gold + onboarded), AdminLogin séparé, AdminDashboard avec 4 tabs : Utilisateurs (table avec score/projet/statut), Événements (CRUD avec plan_required), Ressources (CRUD), Post-its (envoi à utilisateur ciblé)
-- [x] **Stripe TEST mode** : 3 plans Bronze (49€) / Silver (99€) / Gold (199€), POST /api/checkout/session, GET /api/checkout/status, POST /api/webhook/stripe, payment_transactions collection, plan upgrade automatique après paiement, polling côté frontend après redirect
-- [x] **Feature gating par plan** : ressources, événements, modules formations, experts filtrés selon plan utilisateur
-- [x] **Plan pill sidebar** : visible en bas, ouvre UpgradeModal avec pricing comparé
+- [x] Cockpit complet (score+sparkline, status stepper, post-its or/bleu, événements)
+- [x] Post-its bidirectionnels (admin or, user bleu, badge "Nouveau")
+- [x] Mon projet enrichi (pitch, objectifs, roadmap timeline, statut)
+- [x] Profil sub-tabs (Profil & Projet · Documents) avec upload local
+- [x] Espace Admin sécurisé (4 sections: users, events, resources, postits)
+- [x] Stripe TEST mode (Bronze 49€/Silver 99€/Gold 199€) avec checkout + webhook
+- [x] Feature gating par plan (modules, experts, ressources, événements)
+- [x] Missions XP/level, Formations parcours
 
-### Tests
+### Phase 3 (finitions premium)
+- [x] **Logo Envol** intégré (`/assets/logo.png`) en landing, sidebar, footer, admin
+- [x] **2e admin** : `gaspard.boachon@gmail.com / Stranger747!` (auto-seedé)
+- [x] **"Qui sommes-nous"** : team Léo (or) + Gaspard (lavande), mission, 3 valeurs
+- [x] **Animations** : CountUp (chiffres animés au scroll), Reveal (apparition progressive), transitions fluides
+- [x] **Icons unifiés** : lucide-react partout (sidebar, admin, features), plus d'emojis
+- [x] **Photo de profil** : POST /api/profile/photo (UploadFile png/jpg/webp), GET /api/profile/photo/{user_id}, overlay caméra cliquable
+- [x] **Reset password** : flow complet `/auth/request-reset` → token (DEV: retourné directement) → `/auth/reset-password` (revoque le token après usage). Anti-enumeration. Lien depuis modal connexion.
+- [x] **Vraies vidéos formations** : GET /api/formations retourne 5 modules avec `video_url` (YouTube embeds), `lessons` array, modal player avec iframe responsive
+- [x] **Calendar full-month** : grille 7 colonnes avec navigation mois ‹ ›, dots sur jours avec événements, popover avec liste des évents du jour
+- [x] **Toasts** : remplace `alert()`, success/info, animations soft
+- [x] **GET /api/about** : team + mission + values (servi à la landing)
+
+## Tests
 - Phase 1 : 100% backend + 100% frontend
-- Phase 2 : 97% backend (33/34) + 100% frontend — fix appliqué pour 500→404 sur checkout/status
+- Phase 2 : 97% → 100% backend (33/34 → fix appliqué) + 100% frontend
+- Phase 3 : **100% backend (45/45)** + ~95% frontend (1 fix appliqué après testing : data-testid sur tous les modules formations + boutons Débloquer/Regarder)
 
 ## Backlog / Future
-- P1: Real videos in formations modules
-- P1: Realtime chat (websocket) pour communauté
-- P1: Webhook Stripe vérifié (signature) sur la prod
-- P2: Reset password par email + confirmation email
-- P2: Upload photo profil (Cloudinary)
-- P2: Calendar view full month (à la Google Calendar)
-- P2: Notifications push / email
-- P2: Mindmap interactive (présent dans HTML v10)
-- P3: Système de badges/achievements pour les missions
-- P3: Stats personnelles temporelles (graphes mensuels)
+- P1: Vrai email pour reset password (Resend ou SendGrid)
+- P1: Realtime chat (websocket) - actuellement chat statique + bulle IA Claude
+- P1: Push notifications navigateur
+- P2: Stripe Live mode (juste switch de la clé)
+- P2: Webhook signature verification renforcée
+- P2: Netlify deploy guide
+- P2: Cloudinary pour stockage cloud des fichiers
+- P3: Splitter server.py en routers/auth.py, routers/formations.py, etc. (730 lignes)
 
-## Notes
-- Token JWT 30 jours dans localStorage (envol_token)
-- Admin login : `/admin` ou `#admin` ou clic logo ENVOL
-- Stripe test : aucun vrai paiement, redirige vers sandbox
-- Tous les data-testid présents
+## Notes opérationnelles
+- Token JWT 30j dans localStorage (`envol_token`)
+- Reset token JWT 1h dans `db.password_resets` + flag `used`
+- Photos profil overwriteables (par extension), avatar.{ext}
+- Calendrier filtré par plan utilisateur (events.plan_required)
+- Mobile responsive : sidebar 70px sur < 900px, logo affiché seul
+- Stripe Live : remplacer `STRIPE_API_KEY` dans `.env` par `sk_live_xxx`

@@ -302,7 +302,7 @@ function Formations({ user, setShowUpgrade }) {
           const reqRank = PLAN_RANK[m.plan_required] || 1;
           const locked = reqRank > userRank;
           return (
-            <div key={m.n} className={`path-mod ${locked ? "lock-plan" : "ready"}`}>
+            <div key={m.n} data-testid={`fmod-${m.n}`} className={`path-mod ${locked ? "lock-plan" : "ready"}`}>
               <div className="path-num">{m.n}</div>
               <div style={{ flex: 1 }}>
                 <div className="path-t">{m.title} {locked && <span className="lock-tag">{m.plan_required}+</span>}</div>
@@ -310,9 +310,9 @@ function Formations({ user, setShowUpgrade }) {
                 <div className="path-meta">⏱ {m.duration} · {m.lessons.length} leçons</div>
               </div>
               {locked ? (
-                <button className="btn-gold" onClick={() => setShowUpgrade(true)}>Débloquer</button>
+                <button className="btn-gold" data-testid={`fmod-unlock-${m.n}`} onClick={() => setShowUpgrade(true)}>Débloquer</button>
               ) : (
-                <button className="btn-gold" data-testid={`fmod-${m.n}`} onClick={() => setActive(m)}>▶ Regarder</button>
+                <button className="btn-gold" data-testid={`fmod-watch-${m.n}`} onClick={() => setActive(m)}>▶ Regarder</button>
               )}
             </div>
           );
