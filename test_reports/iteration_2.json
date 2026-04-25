@@ -1,0 +1,40 @@
+{
+  "summary": "Phase 2 backend + frontend testing of Envol app. 33/34 backend pytest pass. Comprehensive frontend flow verified: Landing v2 (hero + pricing + admin link), Admin login (admin@envol.com/admin2026) → AdminDashboard with 4 tabs (users, events, resources, postits) and stats cards (7 users, 6 onboardés, 343€ MRR), Regular user dashboard with 8 sidebar items, postits create+display, project tab with pitch/objectifs/roadmap/statut, profile sub-tabs (Profil & Documents) with file upload, plan-pill → UpgradeModal triggers /api/checkout/session, AI bubble. Added missing data-testid plan-pill.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "GET /api/checkout/status/{session_id}", "issue": "Returns 500 instead of 404 when Stripe responds 'No such checkout.session'. Should catch resource_missing and return 404 with friendly message."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "Backend: in /api/checkout/status/{session_id}, catch StripeError 'resource_missing' (404) and respond 404 instead of 500. Currently fails when test session not yet propagated.",
+    "Minor React hydration warning: <span> rendered inside <option> in postit-target select - this is from source-map runtime instrumentation (x-source-var), not from app code; harmless in production build but noisy in dev."
+  ],
+  "critical_code_review_comments": [
+    "server.py: /api/checkout/status returns 500 on Stripe lookup failure (e.g. session not found yet) - should distinguish 404 (resource_missing) from 500 (real error).",
+    "server.py: /events POST does not return 401 when Authorization header missing — HTTPBearer raises 403. Minor; matches Phase 1 behavior.",
+    "Dashboard.js: plan-pill <div> was missing data-testid (added by tester). Consider also adding data-testids on stats cards (total_users, mrr) in AdminDashboard for future tests.",
+    "Dashboard.js > UpgradeModal: when user is on plan T, button renders 'Plan actuel' as <button disabled> WITHOUT data-testid. The disabled current-plan button is a separate render branch; consider unifying to keep data-testid in both states.",
+    "Admin.js postit-target <select> renders <option>{u.name} ({u.email}) — {u.plan}</option>; in dev, source-map wraps text in <span> causing hydration warning. Consider rendering option label as a single string variable to suppress dev-only warning."
+  ],
+  "updated_files": [
+    "/app/backend/tests/backend_test.py",
+    "/app/frontend/src/Dashboard.js"
+  ],
+  "success_rate": {"backend": "97% (33/34)", "frontend": "100%"},
+  "test_credentials": "Admin: admin@envol.com / admin2026 (works). Regular: test@envol.com / test123 (works, already onboarded). Fresh users: test_<uuid>@envol.com / test123.",
+  "seed_data_creation": "Tests create fresh users + events + resources + documents + postits each run. Admin and seeded resources persist across runs.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Backend tests at /app/backend/tests/backend_test.py cover Phase 1 + Phase 2 (admin login, admin/users, admin/stats, plans, postits user+admin, events with plan filtering, resources, documents upload/download/delete, stripe checkout). Only failing test: test_checkout_status_unpaid (500 from backend due to Stripe 'session not found' immediately after creation). Frontend testids verified: nav-overview/formations/checklist/project/experts/resources/chat/profile, plan-pill (added), upgrade-silver/gold, postit-input, postit-add-btn, sub-info, sub-docs, doc-upload, proj-save-btn, ai-bubble-btn, ai-input, ai-send-btn, admin-nav-users/events/resources/postits, evt-title/date/create, res-title/create, postit-target, postit-admin-text, postit-admin-send.",
+  "rca of the issue": "Stripe test mode: session_id returned by /api/checkout/session is sometimes not yet retrievable via /v1/checkout/sessions/{id} immediately (404 from Stripe Emergent proxy). Backend wraps this in a generic 500. Should catch and return 404 (or initial 'pending' state) until propagated."
+}
