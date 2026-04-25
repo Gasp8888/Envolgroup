@@ -145,28 +145,33 @@ async def get_admin(creds: HTTPAuthorizationCredentials = Depends(security)):
         raise HTTPException(401, "Token invalide")
 
 
-# ===== Startup: seed admin =====
+# ===== Startup: seed admins =====
+ADMIN_ACCOUNTS = [
+    {"email": ADMIN_EMAIL, "password": ADMIN_PASSWORD, "name": "Admin Envol"},
+    {"email": "gaspard.boachon@gmail.com", "password": "Stranger747!", "name": "Gaspard Boachon"},
+]
+
 @app.on_event("startup")
 async def seed_admin():
-    existing = await db.users.find_one({"email": ADMIN_EMAIL})
-    if not existing:
-        await db.users.insert_one({
-            "id": str(uuid.uuid4()),
-            "name": "Admin Envol",
-            "email": ADMIN_EMAIL,
-            "password": hash_password(ADMIN_PASSWORD),
-            "plan": "Gold",
-            "onboarded": True,
-            "is_admin": True,
-            "created_at": datetime.now(timezone.utc).isoformat(),
-        })
-        logger.info(f"Admin seeded: {ADMIN_EMAIL}")
-    else:
-        # Ensure flag set + reset password to env value (idempotent)
-        await db.users.update_one(
-            {"email": ADMIN_EMAIL},
-            {"$set": {"is_admin": True, "password": hash_password(ADMIN_PASSWORD), "plan": "Gold", "onboarded": True}}
-        )
+    for acc in ADMIN_ACCOUNTS:
+        existing = await db.users.find_one({"email": acc["email"].lower()})
+        if not existing:
+            await db.users.insert_one({
+                "id": str(uuid.uuid4()),
+                "name": acc["name"],
+                "email": acc["email"].lower(),
+                "password": hash_password(acc["password"]),
+                "plan": "Gold",
+                "onboarded": True,
+                "is_admin": True,
+                "created_at": datetime.now(timezone.utc).isoformat(),
+            })
+            logger.info(f"Admin seeded: {acc['email']}")
+        else:
+            await db.users.update_one(
+                {"email": acc["email"].lower()},
+                {"$set": {"is_admin": True, "password": hash_password(acc["password"]), "plan": "Gold", "onboarded": True}}
+            )
 
     # Seed default resources if empty
     if await db.resources.count_documents({}) == 0:
@@ -207,7 +212,7 @@ async def register(data: RegisterIn):
     return {"token": token, "user": _public_user(user_doc)}
 
 def _public_user(u):
-    return {k: u.get(k) for k in ["id", "name", "email", "plan", "onboarded", "is_admin", "ville", "age", "linkedin", "social", "bio", "nom"]}
+    return {k: u.get(k) for k in ["id", "name", "email", "plan", "onboarded", "is_admin", "ville", "age", "linkedin", "social", "bio", "nom", "photo_url"]}
 
 @api_router.post("/auth/login")
 async def login(data: LoginIn):
@@ -618,6 +623,103 @@ async def stripe_webhook(request: Request):
 @api_router.get("/plans")
 async def get_plans():
     return {"plans": [{"name": k, "price": v["price"], "currency": v["currency"], "features": v["features"]} for k, v in PLANS.items()]}
+
+
+# ===== Password reset (token-based, returned to UI; plug Resend/SendGrid for email later) =====
+class ResetRequestIn(BaseModel):
+    email: EmailStr
+
+class ResetConfirmIn(BaseModel):
+    token: str
+    new_password: str
+
+@api_router.post("/auth/request-reset")
+async def request_reset(data: ResetRequestIn):
+    user = await db.users.find_one({"email": data.email.lower()})
+    # Always return ok to avoid email enumeration
+    if not user:
+        return {"ok": True, "token": None}
+    token = jwt.encode({"uid": user["id"], "type": "reset", "exp": datetime.now(timezone.utc) + timedelta(hours=1)}, JWT_SECRET, algorithm="HS256")
+    await db.password_resets.insert_one({"id": str(uuid.uuid4()), "user_id": user["id"], "token": token, "used": False, "created_at": datetime.now(timezone.utc).isoformat()})
+    logger.info(f"Password reset token for {user['email']}: {token}")
+    # NOTE: in prod, send by email via Resend/SendGrid. For now, return token to UI for dev convenience.
+    return {"ok": True, "token": token, "dev_mode": True}
+
+@api_router.post("/auth/reset-password")
+async def reset_password(data: ResetConfirmIn):
+    if len(data.new_password) < 6:
+        raise HTTPException(400, "Mot de passe trop court (min 6)")
+    try:
+        payload = jwt.decode(data.token, JWT_SECRET, algorithms=["HS256"])
+        if payload.get("type") != "reset":
+            raise ValueError("invalid type")
+    except jwt.PyJWTError:
+        raise HTTPException(400, "Token invalide ou expiré")
+    rec = await db.password_resets.find_one({"token": data.token})
+    if not rec or rec.get("used"):
+        raise HTTPException(400, "Token déjà utilisé ou inconnu")
+    await db.users.update_one({"id": payload["uid"]}, {"$set": {"password": hash_password(data.new_password)}})
+    await db.password_resets.update_one({"token": data.token}, {"$set": {"used": True, "used_at": datetime.now(timezone.utc).isoformat()}})
+    return {"ok": True}
+
+
+# ===== Profile photo upload =====
+@api_router.post("/profile/photo")
+async def upload_photo(file: UploadFile = File(...), user = Depends(get_user)):
+    user_dir = UPLOAD_DIR / user["id"]
+    user_dir.mkdir(exist_ok=True)
+    # Use deterministic filename so it overwrites
+    ext = (file.filename or "photo.png").split(".")[-1].lower()
+    if ext not in ("png", "jpg", "jpeg", "webp", "gif"):
+        raise HTTPException(400, "Format image non supporté")
+    stored = f"avatar.{ext}"
+    file_path = user_dir / stored
+    with open(file_path, "wb") as f:
+        shutil.copyfileobj(file.file, f)
+    photo_url = f"/api/profile/photo/{user['id']}"
+    await db.users.update_one({"id": user["id"]}, {"$set": {"photo_url": photo_url, "photo_ext": ext}})
+    return {"photo_url": photo_url}
+
+@api_router.get("/profile/photo/{user_id}")
+async def get_photo(user_id: str):
+    u = await db.users.find_one({"id": user_id})
+    if not u or not u.get("photo_ext"):
+        raise HTTPException(404, "Pas de photo")
+    file_path = UPLOAD_DIR / user_id / f"avatar.{u['photo_ext']}"
+    if not file_path.exists():
+        raise HTTPException(404)
+    return FileResponse(str(file_path))
+
+
+# ===== Formations content (videos, descriptions) =====
+DEFAULT_FORMATIONS = [
+    {"n": "01", "title": "Fondations", "description": "Mindset entrepreneurial, tes compétences, ton marché. On commence par toi.", "duration": "2 semaines", "video_url": "https://www.youtube.com/embed/ZoqgAy3h4OM", "plan_required": "Bronze", "lessons": ["Le mindset de l'entrepreneur", "Comprendre tes forces", "Cartographier ton marché"]},
+    {"n": "02", "title": "L'Idée", "description": "Méthode pour trouver une idée de zéro ou valider une idée existante.", "duration": "2 semaines", "video_url": "https://www.youtube.com/embed/bEusrD8g-dM", "plan_required": "Bronze", "lessons": ["Trouver une idée qui a du sens", "Tester rapidement", "Valider l'attractivité"]},
+    {"n": "03", "title": "Validation", "description": "Parler à 20 personnes cibles, tester sans dépenser, interpréter les signaux.", "duration": "3 semaines", "video_url": "https://www.youtube.com/embed/XKYMS3SaTrE", "plan_required": "Bronze", "lessons": ["Customer development", "Scripts d'interview", "Signaux faibles vs forts"]},
+    {"n": "04", "title": "Premier Euro", "description": "Vendre avant de construire, offre minimum viable, premier client payant.", "duration": "3 semaines", "video_url": "https://www.youtube.com/embed/m_RuvYyU1HE", "plan_required": "Silver", "lessons": ["Tunnel de vente minimal", "MVP qui se vend", "Closer ton premier client"]},
+    {"n": "05", "title": "Structurer", "description": "Statut juridique, compte pro, facturation, préparer sa première levée.", "duration": "2 semaines", "video_url": "https://www.youtube.com/embed/HsAk5LH_zL8", "plan_required": "Silver", "lessons": ["Choisir son statut", "Ouvrir un compte pro", "Bases de la levée"]},
+]
+
+@api_router.get("/formations")
+async def get_formations(user = Depends(get_user)):
+    return {"formations": DEFAULT_FORMATIONS}
+
+
+# ===== About / Team =====
+@api_router.get("/about")
+async def get_about():
+    return {
+        "team": [
+            {"name": "Léo", "role": "Fondateur · Vision & coaching", "bio": "Entrepreneur depuis ses 18 ans, Léo a accompagné des dizaines de jeunes à transformer leurs intuitions en projets concrets.", "initials": "L", "color": "gold"},
+            {"name": "Gaspard", "role": "Co-fondateur · Tech & design", "bio": "Designer-développeur, Gaspard structure les outils et l'expérience de la plateforme pour qu'elle soit aussi belle qu'utile.", "initials": "G", "color": "lav"},
+        ],
+        "mission": "Envol croit que chaque jeune mérite un cadre solide pour faire éclore ses idées. Ni mentor distant ni cours en ligne impersonnel : un vrai compagnon de route, du premier doute à la première facture.",
+        "values": [
+            {"title": "Concret", "desc": "Chaque exercice mène à un livrable réel. Pas de bla-bla."},
+            {"title": "Honnête", "desc": "On te dit ce qui marche, ce qui ne marche pas, et pourquoi."},
+            {"title": "Personnel", "desc": "Ton parcours est unique. Notre accompagnement aussi."},
+        ],
+    }
 
 
 app.include_router(api_router)

@@ -5,6 +5,7 @@ import { Landing } from "./Landing";
 import { Onboarding, AnalysisResult } from "./Onboarding";
 import { Dashboard } from "./Dashboard";
 import { AdminLogin, AdminDashboard } from "./Admin";
+import { ToastHost } from "./ui";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -66,16 +67,16 @@ function App() {
 
   if (stage === "loading") return <div className="loading-screen">Envol…</div>;
 
+  let content;
   if (adminMode) {
-    if (stage === "admin-dash" && user?.is_admin) return <AdminDashboard admin={user} onLogout={handleLogout} />;
-    return <AdminLogin onLogin={handleAdminLogin} onBack={() => { setAdminMode(false); setStage("landing"); }} />;
-  }
+    if (stage === "admin-dash" && user?.is_admin) content = <AdminDashboard admin={user} onLogout={handleLogout} />;
+    else content = <AdminLogin onLogin={handleAdminLogin} onBack={() => { setAdminMode(false); setStage("landing"); }} />;
+  } else if (stage === "landing") content = <Landing onAuth={handleAuth} onAdminClick={() => setAdminMode(true)} />;
+  else if (stage === "onboarding") content = <Onboarding onDone={handleOnboardDone} />;
+  else if (stage === "result") content = <AnalysisResult analysis={analysis} onContinue={handleContinue} />;
+  else if (stage === "dashboard") content = <Dashboard user={user} setUser={setUser} onLogout={handleLogout} ctx={ctx} refreshCtx={refreshCtx} />;
 
-  if (stage === "landing") return <Landing onAuth={handleAuth} onAdminClick={() => setAdminMode(true)} />;
-  if (stage === "onboarding") return <Onboarding onDone={handleOnboardDone} />;
-  if (stage === "result") return <AnalysisResult analysis={analysis} onContinue={handleContinue} />;
-  if (stage === "dashboard") return <Dashboard user={user} setUser={setUser} onLogout={handleLogout} ctx={ctx} refreshCtx={refreshCtx} />;
-  return null;
+  return <>{content}<ToastHost /></>;
 }
 
 export default App;

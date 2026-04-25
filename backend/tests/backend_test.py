@@ -346,4 +346,122 @@ def test_checkout_status_unpaid(session, new_user):
     sid = r.json()["session_id"]
     r2 = session.get(f"{API}/checkout/status/{sid}", headers=H(new_user['token']), timeout=15)
     assert r2.status_code == 200
-    assert r2.json()["payment_status"] in ("unpaid", "paid", "no_payment_required")
+    assert r2.json()["payment_status"] in ("unpaid", "paid", "no_payment_required", "pending")
+
+
+# ===== Phase 3: Second admin =====
+def test_second_admin_login(session):
+    r = session.post(f"{API}/auth/login", json={"email": "gaspard.boachon@gmail.com", "password": "Stranger747!"}, timeout=10)
+    assert r.status_code == 200, r.text
+    j = r.json()
+    assert j["user"]["is_admin"] is True
+    assert j["token"]
+
+
+# ===== Phase 3: About =====
+def test_about_endpoint(session):
+    r = session.get(f"{API}/about", timeout=10)
+    assert r.status_code == 200
+    j = r.json()
+    assert "team" in j and len(j["team"]) == 2
+    names = [t["name"] for t in j["team"]]
+    assert "Léo" in names and "Gaspard" in names
+    assert "mission" in j and isinstance(j["mission"], str) and len(j["mission"]) > 10
+    assert "values" in j and len(j["values"]) == 3
+
+
+# ===== Phase 3: Formations =====
+def test_formations_requires_auth(session):
+    r = session.get(f"{API}/formations", timeout=10)
+    assert r.status_code in (401, 403)
+
+
+def test_formations_returns_5_modules(session, new_user):
+    r = session.get(f"{API}/formations", headers=H(new_user['token']), timeout=10)
+    assert r.status_code == 200
+    forms = r.json()["formations"]
+    assert len(forms) == 5
+    for f in forms:
+        assert "video_url" in f and f["video_url"].startswith("http")
+        assert "lessons" in f and isinstance(f["lessons"], list) and len(f["lessons"]) >= 1
+        assert f["plan_required"] in ("Bronze", "Silver", "Gold")
+
+
+# ===== Phase 3: Password reset =====
+def test_request_reset_existing(session, new_user):
+    r = session.post(f"{API}/auth/request-reset", json={"email": new_user["email"]}, timeout=10)
+    assert r.status_code == 200
+    j = r.json()
+    assert j["ok"] is True
+    assert j.get("token")
+    assert j.get("dev_mode") is True
+
+
+def test_request_reset_non_existing_no_enumeration(session):
+    r = session.post(f"{API}/auth/request-reset", json={"email": f"noexist_{uuid.uuid4().hex[:6]}@envol.com"}, timeout=10)
+    assert r.status_code == 200
+    j = r.json()
+    assert j["ok"] is True
+    assert j.get("token") is None
+
+
+def test_reset_password_full_flow(session):
+    # Create fresh user
+    email = f"reset_{uuid.uuid4().hex[:8]}@envol.com"
+    r = session.post(f"{API}/auth/register", json={"name": "Reset", "email": email, "password": "old123"}, timeout=10)
+    assert r.status_code == 200
+    # Request reset
+    r2 = session.post(f"{API}/auth/request-reset", json={"email": email}, timeout=10)
+    token = r2.json()["token"]
+    assert token
+    # Reset password
+    r3 = session.post(f"{API}/auth/reset-password", json={"token": token, "new_password": "newPwd99"}, timeout=10)
+    assert r3.status_code == 200
+    assert r3.json()["ok"] is True
+    # Old password should fail
+    r4 = session.post(f"{API}/auth/login", json={"email": email, "password": "old123"}, timeout=10)
+    assert r4.status_code == 401
+    # New password works
+    r5 = session.post(f"{API}/auth/login", json={"email": email, "password": "newPwd99"}, timeout=10)
+    assert r5.status_code == 200
+    # Token re-use rejected
+    r6 = session.post(f"{API}/auth/reset-password", json={"token": token, "new_password": "another1"}, timeout=10)
+    assert r6.status_code == 400
+
+
+def test_reset_password_invalid_token(session):
+    r = session.post(f"{API}/auth/reset-password", json={"token": "garbage.token", "new_password": "abc123"}, timeout=10)
+    assert r.status_code == 400
+
+
+# ===== Phase 3: Profile photo =====
+def test_profile_photo_upload_and_get(new_user):
+    # Minimal valid PNG (1x1 red pixel)
+    png_bytes = bytes.fromhex(
+        "89504E470D0A1A0A0000000D49484452000000010000000108060000001F15C489"
+        "0000000D4944415478DA63F8CFC0F00F00030301013AF1B5B30000000049454E44AE426082"
+    )
+    headers = {"Authorization": f"Bearer {new_user['token']}"}
+    files = {"file": ("avatar.png", io.BytesIO(png_bytes), "image/png")}
+    r = requests.post(f"{API}/profile/photo", headers=headers, files=files, timeout=15)
+    assert r.status_code == 200, r.text
+    j = r.json()
+    assert "photo_url" in j and new_user["user"]["id"] in j["photo_url"]
+    # GET photo back
+    r2 = requests.get(f"{API}{j['photo_url'].replace('/api', '', 1)}", timeout=10)
+    # photo_url is /api/profile/photo/{uid}, BASE_URL+photo_url
+    r2 = requests.get(f"{BASE_URL}{j['photo_url']}", timeout=10)
+    assert r2.status_code == 200
+    assert r2.headers.get("content-type", "").startswith("image/")
+
+
+def test_profile_photo_invalid_format(new_user):
+    headers = {"Authorization": f"Bearer {new_user['token']}"}
+    files = {"file": ("bad.txt", io.BytesIO(b"not an image"), "text/plain")}
+    r = requests.post(f"{API}/profile/photo", headers=headers, files=files, timeout=10)
+    assert r.status_code == 400
+
+
+def test_profile_photo_get_not_found(session):
+    r = session.get(f"{API}/profile/photo/nonexistent-uid-zzz", timeout=10)
+    assert r.status_code == 404

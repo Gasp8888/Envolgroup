@@ -1,15 +1,17 @@
 import React, { useEffect, useState, useRef } from "react";
 import { api, PLAN_RANK, PLAN_PRICES } from "./api";
+import { LayoutDashboard, GraduationCap, CheckSquare, Target, Users, FolderArchive, MessageCircle, User, Calendar as CalIcon, Sparkles, Camera, Trash2, Download, Plus } from "lucide-react";
+import { CountUp, Logo, Reveal, toast } from "./ui";
 
 const NAV_ITEMS = [
-  { id: "overview", label: "Vue d'ensemble", icon: "◐" },
-  { id: "formations", label: "Formations", icon: "▤" },
-  { id: "checklist", label: "Missions", icon: "✓" },
-  { id: "project", label: "Mon projet", icon: "◆" },
-  { id: "experts", label: "Suivi & Experts", icon: "◉" },
-  { id: "resources", label: "Ressources", icon: "▦" },
-  { id: "chat", label: "Chat", icon: "◯" },
-  { id: "profile", label: "Mon profil", icon: "●" },
+  { id: "overview", label: "Vue d'ensemble", Icon: LayoutDashboard },
+  { id: "formations", label: "Formations", Icon: GraduationCap },
+  { id: "checklist", label: "Missions", Icon: CheckSquare },
+  { id: "project", label: "Mon projet", Icon: Target },
+  { id: "experts", label: "Suivi & Experts", Icon: Users },
+  { id: "resources", label: "Ressources", Icon: FolderArchive },
+  { id: "chat", label: "Chat", Icon: MessageCircle },
+  { id: "profile", label: "Mon profil", Icon: User },
 ];
 
 const STATUTS = ["Idée", "Développement", "Lancement", "Croissance"];
@@ -38,7 +40,7 @@ export function Dashboard({ user, setUser, onLogout, ctx, refreshCtx }) {
       if (data.payment_status === "paid") {
         await refreshCtx();
         window.history.replaceState({}, "", "/");
-        alert(`✅ Paiement réussi ! Tu es maintenant en plan ${data.plan} 🎉`);
+        toast(`✅ Paiement réussi ! Plan ${data.plan} activé`, "success");
         return;
       }
       setTimeout(() => pollStatus(sid, attempts + 1), 2000);
@@ -48,13 +50,16 @@ export function Dashboard({ user, setUser, onLogout, ctx, refreshCtx }) {
   return (
     <div className="dash">
       <aside className="sidebar">
-        <div className="sidebar-logo">ENVOL</div>
+        <Logo size={26} />
         <nav className="sidebar-nav">
-          {NAV_ITEMS.map((n) => (
-            <button key={n.id} data-testid={`nav-${n.id}`} className={`nav-item ${tab === n.id ? "active" : ""}`} onClick={() => setTab(n.id)}>
-              <span className="nav-icon">{n.icon}</span><span>{n.label}</span>
-            </button>
-          ))}
+          {NAV_ITEMS.map((n) => {
+            const Icon = n.Icon;
+            return (
+              <button key={n.id} data-testid={`nav-${n.id}`} className={`nav-item ${tab === n.id ? "active" : ""}`} onClick={() => setTab(n.id)}>
+                <span className="nav-icon"><Icon size={16} strokeWidth={1.7} /></span><span>{n.label}</span>
+              </button>
+            );
+          })}
         </nav>
         <div className="sidebar-footer">
           <div data-testid="plan-pill" className={`plan-pill plan-${user.plan?.toLowerCase()}`} onClick={() => setShowUpgrade(true)}>
@@ -195,25 +200,7 @@ function Overview({ user, ctx, setTab, refreshCtx }) {
               <div className="card-title">À venir</div>
             </div>
           </div>
-          {events.length === 0 ? (
-            <div className="empty-msg">Pas d'événement programmé</div>
-          ) : (
-            <div className="events-list">
-              {events.slice(0, 4).map((e) => (
-                <div key={e.id} className="event-row">
-                  <div className="event-date">
-                    <div className="event-d">{new Date(e.date).getDate()}</div>
-                    <div className="event-m">{new Date(e.date).toLocaleString('fr', { month: 'short' })}</div>
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div className="event-t">{e.title}</div>
-                    <div className="event-meta">{new Date(e.date).toLocaleString('fr', { hour: '2-digit', minute: '2-digit' })} · {e.type}</div>
-                  </div>
-                  {e.link && <a href={e.link} target="_blank" rel="noreferrer" className="btn-ghost">Rejoindre</a>}
-                </div>
-              ))}
-            </div>
-          )}
+          <MonthCalendar events={events} />
         </div>
       </div>
 
@@ -235,6 +222,62 @@ function Overview({ user, ctx, setTab, refreshCtx }) {
   );
 }
 
+function MonthCalendar({ events = [] }) {
+  const today = new Date();
+  const [month, setMonth] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
+  const [selected, setSelected] = useState(null);
+  const firstDay = (month.getDay() + 6) % 7;
+  const daysInMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
+  const prev = () => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1));
+  const next = () => setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1));
+  const eventsByDay = {};
+  events.forEach((e) => {
+    const d = new Date(e.date);
+    if (d.getFullYear() === month.getFullYear() && d.getMonth() === month.getMonth()) {
+      const k = d.getDate();
+      eventsByDay[k] = [...(eventsByDay[k] || []), e];
+    }
+  });
+  const cells = [];
+  for (let i = 0; i < firstDay; i++) cells.push(null);
+  for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+  const isToday = (d) => d === today.getDate() && month.getMonth() === today.getMonth() && month.getFullYear() === today.getFullYear();
+  return (
+    <div className="month-cal">
+      <div className="cal-head">
+        <button className="cal-nav" onClick={prev}>‹</button>
+        <div className="cal-title">{month.toLocaleString('fr', { month: 'long', year: 'numeric' })}</div>
+        <button className="cal-nav" onClick={next}>›</button>
+      </div>
+      <div className="cal-grid cal-dow">
+        {["L","M","M","J","V","S","D"].map((d, i) => <div key={i} className="cal-dow-cell">{d}</div>)}
+      </div>
+      <div className="cal-grid">
+        {cells.map((d, i) => (
+          <div key={i} className={`cal-cell ${d ? "" : "empty"} ${isToday(d) ? "today" : ""} ${eventsByDay[d] ? "has" : ""}`} onClick={() => d && eventsByDay[d] && setSelected({ day: d, evs: eventsByDay[d] })}>
+            {d && <span className="cal-d">{d}</span>}
+            {eventsByDay[d] && <span className="cal-dot"></span>}
+          </div>
+        ))}
+      </div>
+      {selected && (
+        <div className="cal-popover">
+          <div className="cal-popover-h">{selected.day} {month.toLocaleString('fr', { month: 'short' })}</div>
+          {selected.evs.map((e) => (
+            <div key={e.id} className="cal-popover-evt">
+              <div className="event-t">{e.title}</div>
+              <div className="event-meta">{new Date(e.date).toLocaleString('fr', { hour: '2-digit', minute: '2-digit' })} · {e.type}</div>
+              {e.link && <a href={e.link} target="_blank" rel="noreferrer" className="btn-ghost" style={{ marginTop: 6 }}>Rejoindre</a>}
+            </div>
+          ))}
+          <button className="link-btn" onClick={() => setSelected(null)}>Fermer</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
 function SparkLine({ values, color = "#C9A84C" }) {
   if (values.length < 2) return null;
   const w = 120, h = 32;
@@ -244,44 +287,54 @@ function SparkLine({ values, color = "#C9A84C" }) {
   return <svg width={w} height={h} className="sparkline"><polyline points={points} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" /></svg>;
 }
 
-// ===== Formations =====
+// ===== Formations (with real video player) =====
 function Formations({ user, setShowUpgrade }) {
   const userRank = PLAN_RANK[user.plan] || 1;
-  const modules = [
-    { n: "01", t: "Fondations", d: "Mindset, compétences, marché. On commence par toi.", st: "done", p: 100, plan: 1 },
-    { n: "02", t: "L'Idée", d: "Trouver une idée ou valider une idée existante.", st: "done", p: 100, plan: 1 },
-    { n: "03", t: "Validation", d: "Parler à 20 personnes, tester sans dépenser.", st: "prog", p: 30, plan: 1 },
-    { n: "04", t: "Premier Euro", d: "Vendre avant de construire, premier client.", st: "lock", p: 0, plan: 2 },
-    { n: "05", t: "Structurer", d: "Statut, compte pro, facturation, levée.", st: "lock", p: 0, plan: 2 },
-  ];
+  const [modules, setModules] = useState([]);
+  const [active, setActive] = useState(null);
+  useEffect(() => { api.get("/formations").then((r) => setModules(r.data.formations)); }, []);
   return (
     <div className="page-content">
       <h1 className="page-title">Formations</h1>
       <p className="page-sub">5 modules · De zéro à ta première vente</p>
       <div className="path-line">
-        {modules.map((m, i) => {
-          const locked = m.plan > userRank;
+        {modules.map((m) => {
+          const reqRank = PLAN_RANK[m.plan_required] || 1;
+          const locked = reqRank > userRank;
           return (
-            <div key={m.n} className={`path-mod ${m.st} ${locked ? "lock-plan" : ""}`}>
+            <div key={m.n} className={`path-mod ${locked ? "lock-plan" : "ready"}`}>
               <div className="path-num">{m.n}</div>
               <div style={{ flex: 1 }}>
-                <div className="path-t">{m.t} {locked && <span className="lock-tag">Silver+</span>}</div>
-                <div className="path-d">{m.d}</div>
-                <div className="progress"><div className="progress-bar" style={{ width: `${m.p}%`, background: m.st === "done" ? "#5BC78A" : "" }}></div></div>
+                <div className="path-t">{m.title} {locked && <span className="lock-tag">{m.plan_required}+</span>}</div>
+                <div className="path-d">{m.description}</div>
+                <div className="path-meta">⏱ {m.duration} · {m.lessons.length} leçons</div>
               </div>
               {locked ? (
-                <button className="btn-gold" onClick={() => setShowUpgrade(true)}>Upgrade</button>
-              ) : m.st === "done" ? (
-                <div className="path-status done">✓</div>
-              ) : m.st === "prog" ? (
-                <button className="btn-ghost">Reprendre</button>
+                <button className="btn-gold" onClick={() => setShowUpgrade(true)}>Débloquer</button>
               ) : (
-                <button className="btn-ghost">Commencer</button>
+                <button className="btn-gold" data-testid={`fmod-${m.n}`} onClick={() => setActive(m)}>▶ Regarder</button>
               )}
             </div>
           );
         })}
       </div>
+      {active && (
+        <div className="modal-bg" onClick={(e) => { if (e.target.className === "modal-bg") setActive(null); }}>
+          <div className="modal video-modal">
+            <button className="modal-close" onClick={() => setActive(null)}>×</button>
+            <div className="card-label">MODULE {active.n}</div>
+            <h3 className="modal-title">{active.title}</h3>
+            <p className="modal-sub">{active.description}</p>
+            <div className="video-wrap">
+              <iframe src={active.video_url} title={active.title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
+            </div>
+            <div className="card-label" style={{ marginTop: 18 }}>AU PROGRAMME</div>
+            <ul className="bullet-list">
+              {active.lessons.map((l, i) => <li key={i}><span>{i + 1}. {l}</span></li>)}
+            </ul>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -569,16 +622,34 @@ function Profile({ user, setUser, project, refreshCtx }) {
 function ProfileInfo({ user, setUser, project, refreshCtx }) {
   const [p, setP] = useState({ name: user.name || "", nom: user.nom || "", ville: user.ville || "", age: user.age || "", linkedin: user.linkedin || "", social: user.social || "", bio: user.bio || "" });
   const [saved, setSaved] = useState(false);
+  const [photoTs, setPhotoTs] = useState(Date.now());
+  const photoRef = useRef(null);
   const save = async () => {
     const { data } = await api.post("/profile", p);
     setUser(data.user); setSaved(true); setTimeout(() => setSaved(false), 2000);
     refreshCtx();
+    toast("Profil sauvegardé", "success");
   };
+  const uploadPhoto = async (file) => {
+    if (!file) return;
+    const fd = new FormData();
+    fd.append("file", file);
+    const { data } = await api.post("/profile/photo", fd, { headers: { "Content-Type": "multipart/form-data" } });
+    setUser({ ...user, photo_url: data.photo_url });
+    setPhotoTs(Date.now());
+    toast("Photo mise à jour", "success");
+    refreshCtx();
+  };
+  const photoSrc = user.photo_url ? `${process.env.REACT_APP_BACKEND_URL}${user.photo_url}?t=${photoTs}` : null;
   return (
     <>
       <div className="card">
         <div className="profile-header">
-          <div className="profile-avatar">{(p.name || "U")[0].toUpperCase()}</div>
+          <div className="photo-wrap" onClick={() => photoRef.current?.click()}>
+            {photoSrc ? <img src={photoSrc} alt="" className="profile-photo" /> : <div className="profile-avatar">{(p.name || "U")[0].toUpperCase()}</div>}
+            <div className="photo-overlay"><Camera size={16} /></div>
+            <input ref={photoRef} data-testid="photo-upload" type="file" accept="image/*" style={{ display: "none" }} onChange={(e) => uploadPhoto(e.target.files[0])} />
+          </div>
           <div>
             <div className="card-title">{p.name || user.name}</div>
             <div className="card-sub">{user.email} · plan {user.plan}</div>

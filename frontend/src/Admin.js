@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { api, TOKEN_KEY } from "./api";
+import { Users2, CalendarRange, BookOpen, StickyNote } from "lucide-react";
+import { Logo } from "./ui";
 
 export function AdminLogin({ onLogin, onBack }) {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -35,10 +37,10 @@ export function AdminLogin({ onLogin, onBack }) {
 }
 
 const ADMIN_NAV = [
-  { id: "users", label: "Utilisateurs", icon: "👥" },
-  { id: "events", label: "Événements", icon: "📅" },
-  { id: "resources", label: "Ressources", icon: "📚" },
-  { id: "postits", label: "Post-its", icon: "📌" },
+  { id: "users", label: "Utilisateurs", Icon: Users2 },
+  { id: "events", label: "Événements", Icon: CalendarRange },
+  { id: "resources", label: "Ressources", Icon: BookOpen },
+  { id: "postits", label: "Post-its", Icon: StickyNote },
 ];
 
 export function AdminDashboard({ admin, onLogout }) {
@@ -49,13 +51,16 @@ export function AdminDashboard({ admin, onLogout }) {
   return (
     <div className="dash">
       <aside className="sidebar admin-sidebar">
-        <div className="sidebar-logo">ENVOL <span className="admin-pill">ADMIN</span></div>
+        <div className="sidebar-logo-wrap"><Logo size={26} /><span className="admin-pill">ADMIN</span></div>
         <nav className="sidebar-nav">
-          {ADMIN_NAV.map((n) => (
-            <button key={n.id} data-testid={`admin-nav-${n.id}`} className={`nav-item ${tab === n.id ? "active" : ""}`} onClick={() => setTab(n.id)}>
-              <span className="nav-icon">{n.icon}</span><span>{n.label}</span>
-            </button>
-          ))}
+          {ADMIN_NAV.map((n) => {
+            const Icon = n.Icon;
+            return (
+              <button key={n.id} data-testid={`admin-nav-${n.id}`} className={`nav-item ${tab === n.id ? "active" : ""}`} onClick={() => setTab(n.id)}>
+                <span className="nav-icon"><Icon size={16} strokeWidth={1.7} /></span><span>{n.label}</span>
+              </button>
+            );
+          })}
         </nav>
         <div className="sidebar-footer">
           <button data-testid="admin-logout" className="btn-ghost logout-btn" onClick={onLogout}>Déconnexion</button>

@@ -1,0 +1,43 @@
+{
+  "summary": "Phase 3 backend + frontend verification of Envol app. 45/45 backend pytest pass (added 13 Phase 3 tests: 2nd admin login, /about, /formations auth+content, request-reset existing/non-existing, full reset flow incl. token re-use rejection, invalid token, photo upload PNG + GET, invalid image format, photo 404). Frontend verified: new logo image at /assets/logo.png loads (200, image/png), 'Qui sommes-nous' nav + team cards (Léo gold, Gaspard lav) + 3 value cards + mission paragraph render, CountUp stats animate (5 / 100+ / 24/7 / 92%), 'Mot de passe oublié ?' link present in login modal → request-reset endpoint returns dev token → 'Nouveau mot de passe' confirm dialog appears, sidebar (regular + admin) renders Logo image and 8 lucide SVG icons (no emojis), Vue d'ensemble has month calendar (32 cal-cell + 7 cal-dow), Formations tab renders 5 modules, fmod-01 'Regarder' opens video modal with YouTube iframe (embed/ZoqgAy3h4OM), Profile photo upload (data-testid photo-upload + accept=image file input) updates user.photo_url, profile-photo round image renders, toast 'Photo mise à jour' appears, Admin login with both admin@envol.com/admin2026 and gaspard.boachon@gmail.com/Stranger747! works and reaches AdminDashboard.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "GET /api/checkout/status/{session_id}", "issue": "Already noted in iter_2; current code now catches resource_missing and returns 'pending' (200). Test extended accordingly. PASS."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Dashboard.js > Formations", "issue": "Silver-locked modules render in DOM but lack data-testid. Only fmod-01/02/03 carry [data-testid^='fmod-'] (3 cards). fmod-04 and fmod-05 are rendered (visible to Bronze user) but missing data-testid attributes, breaking the test contract from the review request.", "selector": "[data-testid='fmod-04'], [data-testid='fmod-05']", "priority": "MEDIUM"},
+      {"component": "Dashboard.js > Formations (Bronze user)", "issue": "Need to verify whether Silver-locked cards display 'Débloquer' button vs 'Regarder'. Earlier render showed 'Régarder' label on all 5 cards in background; review request expects 'Débloquer' for Silver modules to a Bronze user.", "selector": "[data-testid='fmod-04'] button", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "Frontend: Dashboard.js Formations rendering — add data-testid={`fmod-${m.n}`} to ALL formation cards (locked and unlocked). Currently only Bronze cards seem to receive the testid.",
+    "Frontend: For Silver/Gold modules viewed by Bronze user, render a 'Débloquer' button (linking to UpgradeModal) instead of 'Regarder' to match the review-request contract.",
+    "Optional: extend backend test_checkout_status_unpaid to assert payment_status in ('unpaid','paid','no_payment_required','pending') — already done."
+  ],
+  "critical_code_review_comments": [
+    "server.py is ~730 lines with all routers/models/seed/AI/Stripe/uploads in one file — getting close to the 700-line guideline; consider splitting into routers/auth.py, routers/formations.py, routers/photos.py, routers/admin.py for maintainability.",
+    "server.py /api/profile/photo POST overwrites the previous extension's file silently when ext changes (e.g., switch png→webp leaves orphan png on disk). Minor cleanup nicety, not a bug.",
+    "server.py /api/auth/request-reset stores plaintext JWT in MongoDB; not a security issue per se (already signed) but consider a hashed token for defense-in-depth so DB compromise alone cannot trigger resets.",
+    "server.py /api/profile/photo/{user_id} is unauthenticated — fine for avatars but document this so admins know photos are public. Add cache-control headers.",
+    "Dashboard.js Formations rendering branch: ensure data-testid is applied at the outermost card div for every module regardless of plan_required, not only inside the unlocked branch."
+  ],
+  "updated_files": [
+    "/app/backend/tests/backend_test.py"
+  ],
+  "success_rate": {"backend": "100% (45/45)", "frontend": "~95% (formations testid coverage incomplete)"},
+  "test_credentials": "Admins: admin@envol.com/admin2026 AND gaspard.boachon@gmail.com/Stranger747! (both seeded on backend startup, both accept /auth/login). Regular: test@envol.com/test123. Fresh: test_<uuid>@envol.com/test123.",
+  "seed_data_creation": "Tests create fresh users + reset users + events + resources + documents + postits + uploaded avatar PNGs each run. Two admins + 6 default resources persist across restarts.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Backend pytest covers Phase 1+2+3: register, login, /auth/me, onboarding submit (real Claude), project, profile, postits (user blue + admin gold), events (admin create + plan filtering), resources, documents (upload/list/download/delete), stripe checkout/status, admin/users + admin/stats, plans, second admin login, /about, /formations auth + content, full reset flow (request → reset → re-use rejected → invalid token), photo upload + GET + invalid format + 404. Frontend testids confirmed: nav-overview/formations/checklist/project/experts/resources/chat/profile, plan-pill, postit-input, postit-add-btn, sub-info, sub-docs, doc-upload, proj-save-btn, ai-bubble-btn, ai-input, ai-send-btn, fmod-01/02/03 (NOT 04/05 — bug), photo-upload, admin-nav-users/events/resources/postits, evt-title/date/create, res-title/create, postit-target, postit-admin-text, postit-admin-send. Toast system mounted at root. Logo component renders /assets/logo.png + 'ENVOL' text alongside (acceptable per design).",
+  "rca of the issue": "Formations testid bug: in /app/frontend/src/Dashboard.js, the Formations rendering likely conditionally adds data-testid only when plan_required <= user_plan. Need to move data-testid to the unconditional outer div of each module card so locked Silver/Gold cards also expose [data-testid='fmod-04'] and [data-testid='fmod-05']. Additionally the locked-state CTA should read 'Débloquer' (not 'Regarder') when user plan is below module's plan_required."
+}
