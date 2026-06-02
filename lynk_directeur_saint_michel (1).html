@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LYNK — Présentation Lycée Saint-Michel, Annecy</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,200;0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0A0A0A;
+    --w: #FFFFFF;
+    --dim: rgba(255,255,255,0.45);
+    --faint: rgba(255,255,255,0.18);
+    --bd: rgba(255,255,255,0.09);
+    --card: rgba(255,255,255,0.04);
+    --card2: rgba(255,255,255,0.07);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--w);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 5vw; height: 56px;
+    background: rgba(10,10,10,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--bd);
+  }
+  .nav-logo { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 4px; color: var(--w); }
+  .nav-links { display: flex; gap: 32px; }
+  .nav-links a {
+    font-size: 11px; font-weight: 300; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--dim); text-decoration: none; transition: color .2s;
+  }
+  .nav-links a:hover { color: var(--w); }
+
+  /* ── SECTIONS ── */
+  section {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 80px 10vw 60px;
+    border-bottom: 1px solid var(--bd);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ── EYEBROW ── */
+  .eye {
+    font-size: 10px; font-weight: 300; letter-spacing: 3.5px;
+    text-transform: uppercase; color: var(--faint);
+    margin-bottom: 18px;
+  }
+  .rule {
+    width: 40px; height: 1px; background: rgba(255,255,255,0.15);
+    margin-bottom: 32px;
+  }
+
+  /* ── COVER ── */
+  #cover {
+    justify-content: center; align-items: flex-start;
+    background: radial-gradient(ellipse 80% 60% at 80% 50%, rgba(255,255,255,0.03) 0%, transparent 70%);
+  }
+  .cover-kicker {
+    font-size: 11px; letter-spacing: 4px; text-transform: uppercase;
+    color: var(--faint); margin-bottom: 24px;
+  }
+  .cover-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(72px, 12vw, 160px);
+    line-height: 0.88;
+    color: var(--w);
+    margin-bottom: 28px;
+  }
+  .cover-sub {
+    font-size: clamp(14px, 1.8vw, 20px);
+    font-weight: 300; color: var(--dim);
+    max-width: 480px; line-height: 1.6;
+    margin-bottom: 48px;
+  }
+  .cover-pills {
+    display: flex; gap: 12px; flex-wrap: wrap;
+  }
+  .pill {
+    border: 1px solid var(--bd);
+    padding: 8px 18px;
+    font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--dim); border-radius: 2px;
+  }
+  .cover-deco {
+    position: absolute; right: 8vw; top: 50%;
+    transform: translateY(-50%);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(200px, 28vw, 400px);
+    color: rgba(255,255,255,0.025);
+    line-height: 1; pointer-events: none; user-select: none;
+    letter-spacing: -10px;
+  }
+
+  /* ── PROBLÈME ── */
+  .prob-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    margin-top: 8px;
+  }
+  .prob-item {
+    background: var(--card);
+    border: 1px solid var(--bd);
+    padding: 32px 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .prob-item::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  }
+  .prob-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px; color: rgba(255,255,255,0.06);
+    position: absolute; top: 12px; right: 20px;
+    line-height: 1;
+  }
+  .prob-title {
+    font-size: 13px; font-weight: 500; letter-spacing: 1px;
+    color: var(--w); margin-bottom: 10px; text-transform: uppercase;
+  }
+  .prob-body {
+    font-size: 13px; font-weight: 300; color: var(--dim); line-height: 1.65;
+  }
+  .prob-body strong { color: var(--w); font-weight: 400; }
+  .prob-stat-band {
+    margin-top: 32px;
+    padding: 24px 28px;
+    background: var(--card);
+    border: 1px solid var(--bd);
+    display: flex; gap: 40px; align-items: center;
+    flex-wrap: wrap;
+  }
+  .pstat { text-align: center; }
+  .pstat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px; color: var(--w); line-height: 1;
+  }
+  .pstat-lbl { font-size: 11px; font-weight: 300; color: var(--dim); margin-top: 4px; }
+
+  /* ── SOLUTION ── */
+  #solution { background: radial-gradient(ellipse 60% 80% at 30% 50%, rgba(255,255,255,0.02) 0%, transparent 70%); }
+
+  .sol-intro {
+    font-size: clamp(18px, 2.4vw, 28px);
+    font-weight: 300; color: var(--dim);
+    max-width: 700px; line-height: 1.6; margin-bottom: 56px;
+  }
+  .sol-intro strong { color: var(--w); font-weight: 400; }
+
+  /* BOUCLE SVG */
+  .loop-wrapper {
+    display: flex; gap: 60px; align-items: center; flex-wrap: wrap;
+  }
+  .loop-svg-zone { flex: 0 0 420px; }
+  .loop-details { flex: 1; min-width: 260px; }
+
+  .loop-step-list { display: flex; flex-direction: column; gap: 0; }
+  .loop-step {
+    display: flex; gap: 20px; align-items: flex-start;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--bd);
+  }
+  .loop-step:last-child { border-bottom: none; }
+  .ls-icon {
+    width: 36px; height: 36px;
+    border: 1px solid var(--bd);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 14px;
+  }
+  .ls-title { font-size: 13px; font-weight: 500; color: var(--w); margin-bottom: 4px; }
+  .ls-body { font-size: 12px; font-weight: 300; color: var(--dim); line-height: 1.5; }
+  .ls-body strong { color: rgba(255,255,255,0.75); font-weight: 400; }
+
+  /* PRODUITS CARDS */
+  .prod-cards {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-top: 48px;
+  }
+  .prod-card {
+    background: var(--card); border: 1px solid var(--bd);
+    padding: 32px 28px;
+  }
+  .prod-card-label {
+    font-size: 9px; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--faint); margin-bottom: 16px;
+  }
+  .prod-card-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px; color: var(--w); letter-spacing: 2px;
+    margin-bottom: 16px;
+  }
+  .prod-feat {
+    display: flex; align-items: flex-start; gap: 10px;
+    margin-bottom: 10px;
+  }
+  .prod-feat-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: rgba(255,255,255,0.4);
+    flex-shrink: 0; margin-top: 5px;
+  }
+  .prod-feat-text { font-size: 12px; font-weight: 300; color: var(--dim); line-height: 1.5; }
+  .prod-feat-text strong { color: var(--w); font-weight: 400; }
+
+  /* ── APP SCREENS ── */
+  .screens-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px; margin-top: 8px;
+  }
+  .screen-card {
+    background: var(--card); border: 1px solid var(--bd);
+    padding: 28px 22px;
+  }
+  .screen-icon { font-size: 22px; margin-bottom: 14px; }
+  .screen-name {
+    font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase;
+    color: var(--faint); margin-bottom: 8px;
+  }
+  .screen-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px; color: var(--w); letter-spacing: 1px; margin-bottom: 12px;
+  }
+  .screen-feat {
+    font-size: 11px; font-weight: 300; color: var(--dim);
+    line-height: 1.6; margin-bottom: 4px;
+  }
+  .screen-feat::before { content: '— '; color: var(--faint); }
+
+  /* ── BÉNÉFICES ÉTABLISSEMENT ── */
+  .benef-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 2px; margin-top: 8px;
+  }
+  .benef-card {
+    background: var(--card); border: 1px solid var(--bd);
+    padding: 32px 24px; position: relative; overflow: hidden;
+  }
+  .benef-card::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+  }
+  .benef-ico { font-size: 28px; margin-bottom: 16px; }
+  .benef-title { font-size: 14px; font-weight: 500; color: var(--w); margin-bottom: 8px; }
+  .benef-body { font-size: 12px; font-weight: 300; color: var(--dim); line-height: 1.65; }
+  .benef-body strong { color: rgba(255,255,255,0.8); font-weight: 400; }
+  .harcel-block {
+    margin-top: 32px;
+    padding: 28px 32px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.03);
+    position: relative;
+  }
+  .harcel-block::before {
+    content: '';
+    position: absolute; left: 0; top: 0; bottom: 0; width: 2px;
+    background: rgba(255,255,255,0.3);
+  }
+  .harcel-quote {
+    font-size: clamp(14px, 1.8vw, 18px);
+    font-weight: 300; color: var(--w);
+    font-style: italic; line-height: 1.65; margin-bottom: 14px;
+  }
+  .harcel-source {
+    font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--faint);
+  }
+
+  /* ── STATS TERRAIN ── */
+  .stats-hero {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px;
+    margin-bottom: 2px;
+  }
+  .stat-block {
+    background: var(--card); border: 1px solid var(--bd);
+    padding: 32px 28px;
+  }
+  .stat-big {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(52px, 7vw, 88px);
+    line-height: 1; color: var(--w); margin-bottom: 6px;
+  }
+  .stat-lbl { font-size: 12px; font-weight: 300; color: var(--dim); }
+  .stat-sub { font-size: 10px; letter-spacing: 1px; color: var(--faint); margin-top: 4px; }
+
+  .stats-row {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px;
+  }
+  .ctx-block {
+    background: var(--card); border: 1px solid var(--bd);
+    padding: 24px 28px; grid-column: span 3;
+    display: flex; gap: 48px; align-items: center; flex-wrap: wrap;
+  }
+  .ctx-item { display: flex; flex-direction: column; gap: 4px; }
+  .ctx-num {
+    font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--w); line-height: 1;
+  }
+  .ctx-lbl { font-size: 11px; font-weight: 300; color: var(--dim); }
+
+  /* ── CALL TO ACTION ── */
+  #cta {
+    background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(255,255,255,0.04) 0%, transparent 70%);
+  }
+  .cta-headline {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(48px, 8vw, 110px);
+    line-height: 0.9; color: var(--w);
+    margin-bottom: 40px;
+  }
+  .cta-options {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 2px;
+    margin-bottom: 40px;
+  }
+  .cta-option {
+    background: var(--card); border: 1px solid var(--bd);
+    padding: 36px 32px;
+  }
+  .cta-option-num {
+    font-family: 'Bebas Neue', sans-serif; font-size: 14px;
+    letter-spacing: 3px; color: var(--faint); margin-bottom: 12px;
+  }
+  .cta-option-title {
+    font-size: 18px; font-weight: 400; color: var(--w); margin-bottom: 12px;
+  }
+  .cta-option-body {
+    font-size: 13px; font-weight: 300; color: var(--dim); line-height: 1.65;
+  }
+  .cta-option-body strong { color: var(--w); font-weight: 400; }
+  .cta-contact {
+    padding: 24px 32px; border: 1px solid var(--bd);
+    display: flex; gap: 48px; align-items: center; flex-wrap: wrap;
+  }
+  .cta-contact-item { display: flex; flex-direction: column; gap: 4px; }
+  .cta-contact-label { font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--faint); }
+  .cta-contact-value { font-size: 14px; font-weight: 300; color: var(--w); }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 24px 10vw;
+    display: flex; align-items: center; justify-content: space-between;
+    border-top: 1px solid var(--bd);
+  }
+  .footer-logo { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 4px; color: rgba(255,255,255,0.2); }
+  .footer-copy { font-size: 10px; font-weight: 300; color: var(--faint); }
+
+  /* ── SECTION HEADERS ── */
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(42px, 6vw, 80px);
+    line-height: 0.9; color: var(--w);
+    margin-bottom: 40px;
+  }
+  .section-lead {
+    font-size: clamp(14px, 1.6vw, 18px);
+    font-weight: 300; color: var(--dim);
+    max-width: 600px; line-height: 1.7; margin-bottom: 40px;
+  }
+  .section-lead strong { color: var(--w); font-weight: 400; }
+
+  /* ── SÉPARATEUR déco ── */
+  .sep { height: 1px; background: var(--bd); margin: 40px 0; }
+
+  /* scroll fade-in */
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity .6s ease, transform .6s ease; }
+  .reveal.visible { opacity: 1; transform: none; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">LYNK</div>
+  <div class="nav-links">
+    <a href="#probleme">Problème</a>
+    <a href="#solution">Solution</a>
+    <a href="#app">Application</a>
+    <a href="#benefices">Bénéfices</a>
+    <a href="#terrain">Terrain</a>
+    <a href="#cta">Proposition</a>
+  </div>
+</nav>
+
+<!-- ══ COVER ══ -->
+<section id="cover">
+  <div class="cover-deco">LYNK</div>
+  <div class="cover-kicker reveal">Présentation · Lycée Saint-Michel · Annecy</div>
+  <div class="cover-title reveal">RÉINVENTER<br>L'APPRENTISSAGE</div>
+  <div class="cover-sub reveal">Un écosystème physique et numérique pour aider vos élèves à réviser mieux — pas plus.</div>
+  <div class="cover-pills reveal">
+    <span class="pill">Stylo NFC</span>
+    <span class="pill">Application IA</span>
+    <span class="pill">Testé 120 jours</span>
+    <span class="pill">45 élèves</span>
+  </div>
+</section>
+
+<!-- ══ PROBLÈME ══ -->
+<section id="probleme">
+  <div class="eye reveal">01 · Le constat</div>
+  <div class="rule"></div>
+  <div class="section-title reveal">CE QUI NE<br>FONCTIONNE PAS</div>
+  <div class="section-lead reveal">Les lycéens ne révisent pas parce qu'ils <strong>ne savent pas comment</strong> — pas parce qu'ils ne veulent pas.</div>
+
+  <div class="prob-grid reveal">
+    <div class="prob-item">
+      <div class="prob-num">01</div>
+      <div class="prob-title">Révision trop rare</div>
+      <div class="prob-body">En moyenne, un lycéen révise <strong>1h17 par semaine</strong>, en sessions de <strong>10 minutes</strong> seulement. L'intention existe — la méthode manque.</div>
+    </div>
+    <div class="prob-item">
+      <div class="prob-num">02</div>
+      <div class="prob-title">Prise de notes passive</div>
+      <div class="prob-body">Écrire sans structurer ne génère pas de mémorisation. Les cours sont pris mais jamais <strong>exploités efficacement</strong> pour réviser.</div>
+    </div>
+    <div class="prob-item">
+      <div class="prob-num">03</div>
+      <div class="prob-title">Outils inadaptés</div>
+      <div class="prob-body">WhatsApp, photos floues, groupes de classe. Le partage de cours est <strong>chaotique, source de distraction</strong> et souvent de harcèlement.</div>
+    </div>
+    <div class="prob-item">
+      <div class="prob-num">04</div>
+      <div class="prob-title">Désorganisation chronique</div>
+      <div class="prob-body">Sans centralisation, les cours se perdent, les révisions sont bâclées. <strong>Aucun outil scolaire n'a résolu ça</strong> avec l'usage réel des élèves.</div>
+    </div>
+  </div>
+
+  <div class="prob-stat-band reveal">
+    <div class="pstat"><div class="pstat-num">1h17</div><div class="pstat-lbl">de révision / semaine en moyenne</div></div>
+    <div style="width:1px; background:var(--bd); height:48px;"></div>
+    <div class="pstat"><div class="pstat-num">10min</div><div class="pstat-lbl">durée d'une session type</div></div>
+    <div style="width:1px; background:var(--bd); height:48px;"></div>
+    <div class="pstat"><div class="pstat-num">2,31j</div><div class="pstat-lbl">entre deux sessions de révision</div></div>
+    <div style="flex:1; min-width:200px; font-size:11px; font-weight:300; color:var(--faint); font-style:italic;">Source : Étude Eliott, 60 000 lycéens actifs — 2026</div>
+  </div>
+</section>
+
+<!-- ══ SOLUTION ══ -->
+<section id="solution">
+  <div class="eye reveal">02 · La solution</div>
+  <div class="rule"></div>
+  <div class="section-title reveal">L'ÉCOSYSTÈME<br>LYNK</div>
+  <div class="sol-intro reveal">LYNK combine un <strong>stylo NFC physique</strong> et une <strong>application mobile IA</strong> pour créer un rituel de révision — ancré dans un geste simple.</div>
+
+  <!-- BOUCLE FONCTIONNEMENT -->
+  <div class="loop-wrapper reveal">
+    <div class="loop-svg-zone">
+      <svg viewBox="0 0 420 420" width="100%" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L6,3 z" fill="rgba(255,255,255,0.3)"/>
+          </marker>
+        </defs>
+        <!-- Cercle fond -->
+        <circle cx="210" cy="210" r="140" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+
+        <!-- Arcs entre nœuds -->
+        <!-- Écriture → Numérisation -->
+        <path d="M 280 95 A 140 140 0 0 1 350 210" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" marker-end="url(#arrow)"/>
+        <!-- Numérisation → Organisation -->
+        <path d="M 350 225 A 140 140 0 0 1 280 330" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" marker-end="url(#arrow)"/>
+        <!-- Organisation → Révision -->
+        <path d="M 260 345 A 140 140 0 0 1 155 345" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" marker-end="url(#arrow)"/>
+        <!-- Révision → Partage -->
+        <path d="M 135 330 A 140 140 0 0 1 70 225" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" marker-end="url(#arrow)"/>
+        <!-- Partage → Écriture -->
+        <path d="M 70 195 A 140 140 0 0 1 140 95" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+        <!-- Nœuds -->
+        <!-- Écriture (haut) -->
+        <circle cx="210" cy="70" r="36" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+        <text x="210" y="64" font-family="'DM Sans',sans-serif" font-size="16" fill="white" text-anchor="middle">✏️</text>
+        <text x="210" y="80" font-family="'DM Sans',sans-serif" font-size="9" fill="rgba(255,255,255,0.5)" text-anchor="middle" letter-spacing="1">ÉCRITURE</text>
+
+        <!-- Numérisation (droite haut) -->
+        <circle cx="348" cy="165" r="36" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+        <text x="348" y="159" font-family="'DM Sans',sans-serif" font-size="16" fill="white" text-anchor="middle">📷</text>
+        <text x="348" y="175" font-family="'DM Sans',sans-serif" font-size="8.5" fill="rgba(255,255,255,0.5)" text-anchor="middle" letter-spacing="1">NUMÉRISATION</text>
+
+        <!-- Organisation (droite bas) -->
+        <circle cx="348" cy="258" r="36" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+        <text x="348" y="252" font-family="'DM Sans',sans-serif" font-size="16" fill="white" text-anchor="middle">📂</text>
+        <text x="348" y="268" font-family="'DM Sans',sans-serif" font-size="9" fill="rgba(255,255,255,0.5)" text-anchor="middle" letter-spacing="1">ORGANISATION</text>
+
+        <!-- Révision (bas) -->
+        <circle cx="210" cy="355" r="36" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+        <text x="210" y="349" font-family="'DM Sans',sans-serif" font-size="16" fill="white" text-anchor="middle">🧠</text>
+        <text x="210" y="366" font-family="'DM Sans',sans-serif" font-size="9" fill="rgba(255,255,255,0.5)" text-anchor="middle" letter-spacing="1">RÉVISION IA</text>
+
+        <!-- Partage (gauche bas) -->
+        <circle cx="72" cy="258" r="36" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+        <text x="72" y="252" font-family="'DM Sans',sans-serif" font-size="16" fill="white" text-anchor="middle">🔗</text>
+        <text x="72" y="268" font-family="'DM Sans',sans-serif" font-size="9" fill="rgba(255,255,255,0.5)" text-anchor="middle" letter-spacing="1">PARTAGE NFC</text>
+
+        <!-- Stylo (centre) -->
+        <circle cx="210" cy="165" r="36" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"/>
+        <text x="210" y="158" font-family="'Bebas Neue',sans-serif" font-size="12" fill="white" text-anchor="middle" letter-spacing="2">STYLO</text>
+        <text x="210" y="174" font-family="'Bebas Neue',sans-serif" font-size="12" fill="rgba(255,255,255,0.5)" text-anchor="middle" letter-spacing="2">LYNK</text>
+
+        <!-- Lien stylo → app -->
+        <line x1="210" y1="201" x2="210" y2="319" stroke="rgba(255,255,255,0.1)" stroke-width="1" stroke-dasharray="4 4"/>
+      </svg>
+    </div>
+
+    <div class="loop-details reveal">
+      <div class="loop-step-list">
+        <div class="loop-step">
+          <div class="ls-icon">✏️</div>
+          <div>
+            <div class="ls-title">Écriture classique</div>
+            <div class="ls-body">L'élève prend ses notes avec le stylo LYNK, comme d'habitude. <strong>Aucun changement de comportement requis.</strong></div>
+          </div>
+        </div>
+        <div class="loop-step">
+          <div class="ls-icon">📷</div>
+          <div>
+            <div class="ls-title">Numérisation instantanée</div>
+            <div class="ls-body">Il approche le stylo de son téléphone — <strong>l'app s'ouvre</strong>. Il photographie ses notes, l'IA les convertit et les structure.</div>
+          </div>
+        </div>
+        <div class="loop-step">
+          <div class="ls-icon">📂</div>
+          <div>
+            <div class="ls-title">Organisation par matière</div>
+            <div class="ls-body">Les cours se rangent <strong>automatiquement</strong> par matière. Plus de notes perdues, plus de chaos de dossiers.</div>
+          </div>
+        </div>
+        <div class="loop-step">
+          <div class="ls-icon">🧠</div>
+          <div>
+            <div class="ls-title">Révision intelligente par IA</div>
+            <div class="ls-body">L'IA génère des <strong>flashcards, quiz et résumés</strong> à partir des cours. Elle résout les devoirs en expliquant la démarche.</div>
+          </div>
+        </div>
+        <div class="loop-step">
+          <div class="ls-icon">🔗</div>
+          <div>
+            <div class="ls-title">Partage NFC entre élèves</div>
+            <div class="ls-body">Deux stylos se touchent → les fiches se transfèrent. <strong>Remplace les groupes WhatsApp</strong> par un canal structuré et bienveillant.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRODUITS -->
+  <div class="prod-cards reveal">
+    <div class="prod-card">
+      <div class="prod-card-label">Objet physique</div>
+      <div class="prod-card-title">Stylo LYNK</div>
+      <div class="prod-feat"><div class="prod-feat-dot"></div><div class="prod-feat-text"><strong>Puce NFC intégrée</strong> — connexion instantanée à l'app</div></div>
+      <div class="prod-feat"><div class="prod-feat-dot"></div><div class="prod-feat-text"><strong>Écriture classique</strong> — confort identique à un stylo ordinaire</div></div>
+      <div class="prod-feat"><div class="prod-feat-dot"></div><div class="prod-feat-text"><strong>Design ergonomique premium</strong> — embout aimanté fidget</div></div>
+      <div class="prod-feat"><div class="prod-feat-dot"></div><div class="prod-feat-text">Clé d'accès unique à l'app — <strong>sans stylo, pas d'accès</strong></div></div>
+    </div>
+    <div class="prod-card">
+      <div class="prod-card-label">Application mobile iOS + Android</div>
+      <div class="prod-card-title">App LYNK</div>
+      <div class="prod-feat"><div class="prod-feat-dot"></div><div class="prod-feat-text"><strong>IA révision</strong> — flashcards, quiz, résumés, exercices générés automatiquement</div></div>
+      <div class="prod-feat"><div class="prod-feat-dot"></div><div class="prod-feat-text"><strong>Gamification</strong> — XP, niveaux, streaks, classements entre amis</div></div>
+      <div class="prod-feat"><div class="prod-feat-dot"></div><div class="prod-feat-text"><strong>Infos Bac intégrées</strong> — 1ère et Terminale, mises à jour en temps réel</div></div>
+      <div class="prod-feat"><div class="prod-feat-dot"></div><div class="prod-feat-text">Disponible sur <strong>App Store et Google Play</strong></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ APP SCREENS ══ -->
+<section id="app">
+  <div class="eye reveal">03 · L'application</div>
+  <div class="rule"></div>
+  <div class="section-title reveal">TOUR DE<br>L'APPLICATION</div>
+  <div class="section-lead reveal">4 espaces pensés pour couvrir l'intégralité du cycle d'apprentissage d'un lycéen.</div>
+
+  <div class="screens-grid reveal">
+    <div class="screen-card">
+      <div class="screen-icon">🏠</div>
+      <div class="screen-name">Accueil</div>
+      <div class="screen-title">HOME</div>
+      <div class="screen-feat">Défis quotidiens &amp; challenges</div>
+      <div class="screen-feat">Partage rapide NFC</div>
+      <div class="screen-feat">Infos Bac 2026 (1ère + Terminale)</div>
+      <div class="screen-feat">Mes favoris</div>
+    </div>
+    <div class="screen-card">
+      <div class="screen-icon">📚</div>
+      <div class="screen-name">Cours</div>
+      <div class="screen-title">MES COURS</div>
+      <div class="screen-feat">Cours organisés par matière</div>
+      <div class="screen-feat">Scanner + prise de notes</div>
+      <div class="screen-feat">Statistiques d'étude</div>
+      <div class="screen-feat">Matières créées automatiquement</div>
+    </div>
+    <div class="screen-card">
+      <div class="screen-icon">⚡</div>
+      <div class="screen-name">Révision IA</div>
+      <div class="screen-title">RÉVISION</div>
+      <div class="screen-feat">Scanner un devoir (IA explique)</div>
+      <div class="screen-feat">Flashcards personnalisées</div>
+      <div class="screen-feat">Quiz rapides</div>
+      <div class="screen-feat">Résumés IA automatiques</div>
+    </div>
+    <div class="screen-card">
+      <div class="screen-icon">🏆</div>
+      <div class="screen-name">Profil</div>
+      <div class="screen-title">PROFIL</div>
+      <div class="screen-feat">Système XP / Niveaux / Streak</div>
+      <div class="screen-feat">Statistiques personnelles</div>
+      <div class="screen-feat">Réseau d'amis LYNK</div>
+      <div class="screen-feat">Historique complet</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ BÉNÉFICES ÉTABLISSEMENT ══ -->
+<section id="benefices">
+  <div class="eye reveal">04 · Ce que LYNK résout pour votre lycée</div>
+  <div class="rule"></div>
+  <div class="section-title reveal">BÉNÉFICES<br>ÉTABLISSEMENT</div>
+  <div class="section-lead reveal">LYNK n'est pas seulement un outil pour l'élève — c'est une réponse à des problématiques que vous gérez au quotidien.</div>
+
+  <div class="benef-grid reveal">
+    <div class="benef-card">
+      <div class="benef-ico">🚫</div>
+      <div class="benef-title">Réduction du harcèlement numérique</div>
+      <div class="benef-body">Le partage NFC <strong>remplace les groupes WhatsApp de classe</strong> — principale source de harcèlement en ligne. Les échanges se font via un canal structuré, dans le cadre scolaire.</div>
+    </div>
+    <div class="benef-card">
+      <div class="benef-ico">📵</div>
+      <div class="benef-title">Moins de distraction téléphone</div>
+      <div class="benef-body">L'interaction avec le téléphone est <strong>ponctuelle et orientée révision</strong>. LYNK crée un usage intentionnel du numérique — opposé à l'usage passif des réseaux sociaux.</div>
+    </div>
+    <div class="benef-card">
+      <div class="benef-ico">🤝</div>
+      <div class="benef-title">Collaboration structurée entre élèves</div>
+      <div class="benef-body">Le partage de cours via NFC crée une <strong>dynamique d'entraide saine</strong>. Les bons élèves deviennent naturellement des ressources pour leurs camarades.</div>
+    </div>
+    <div class="benef-card">
+      <div class="benef-ico">📈</div>
+      <div class="benef-title">Meilleure organisation des élèves</div>
+      <div class="benef-body">Les cours centralisés et organisés par matière <strong>réduisent le stress</strong> lié aux révisions de dernière minute — et les demandes répétées aux professeurs.</div>
+    </div>
+    <div class="benef-card">
+      <div class="benef-ico">🧠</div>
+      <div class="benef-title">L'IA qui aide à comprendre, pas à copier</div>
+      <div class="benef-body">L'IA de LYNK <strong>explique la démarche</strong> sans donner la réponse directement. Elle adapte la pédagogie à chaque élève — complémentaire au travail des professeurs.</div>
+    </div>
+    <div class="benef-card">
+      <div class="benef-ico">🏫</div>
+      <div class="benef-title">Lycée pionnier &amp; innovant</div>
+      <div class="benef-body">Être <strong>lycée testeur LYNK</strong> positionne votre établissement comme précurseur sur l'innovation pédagogique — un argument fort pour les familles et les enseignants.</div>
+    </div>
+  </div>
+
+  <!-- CITATION PROVISEUR -->
+  <div class="harcel-block reveal">
+    <div class="harcel-quote">
+      "Le partage NFC remplacerait les groupes WhatsApp — source principale de harcèlement — par un canal structuré et bienveillant. Et l'IA aide les élèves à comprendre sans donner la réponse directement, ce qui correspond exactement à notre philosophie pédagogique."
+    </div>
+    <div class="harcel-source">Retour terrain · Direction d'un lycée partenaire · Phase 2</div>
+  </div>
+</section>
+
+<!-- ══ STATS TERRAIN ══ -->
+<section id="terrain">
+  <div class="eye reveal">05 · Résultats terrain</div>
+  <div class="rule"></div>
+  <div class="section-title reveal">120 JOURS.<br>LES CHIFFRES.</div>
+  <div class="section-lead reveal">Phase de test réelle avec <strong>45 élèves</strong> — 30 à Annecy, 15 à Aix-les-Bains. Données collectées sur 120 jours d'usage quotidien.</div>
+
+  <div class="stats-hero reveal">
+    <div class="stat-block">
+      <div class="stat-big">94%</div>
+      <div class="stat-lbl">Taux de rétention</div>
+      <div class="stat-sub">Malgré 2 mois de bug NFC au démarrage</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-big">87%</div>
+      <div class="stat-lbl">Valident le concept &gt; 7/10</div>
+      <div class="stat-sub">Moyenne : 8.3 / 10</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-big">5 083</div>
+      <div class="stat-lbl">Cartes mémoire générées</div>
+      <div class="stat-sub">Feature IA #1 utilisée</div>
+    </div>
+  </div>
+
+  <div class="stats-row reveal" style="margin-top:2px; margin-bottom:2px;">
+    <div class="stat-block">
+      <div class="stat-big">687</div>
+      <div class="stat-lbl">Cours stockés en 120 jours</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-big">97.8%</div>
+      <div class="stat-lbl">Taux de lecture des partages NFC</div>
+      <div class="stat-sub">229 partages enregistrés</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-big">8 min</div>
+      <div class="stat-lbl">Durée session d'étude</div>
+      <div class="stat-sub">Stable sur toute la période</div>
+    </div>
+  </div>
+
+  <div class="ctx-block reveal">
+    <div class="ctx-item">
+      <div class="ctx-num">45</div>
+      <div class="ctx-lbl">Élèves testeurs (stylo + app)</div>
+    </div>
+    <div style="width:1px; background:var(--bd); height:40px;"></div>
+    <div class="ctx-item">
+      <div class="ctx-num">120</div>
+      <div class="ctx-lbl">Collégiens rencontrés à La Salle, Annecy</div>
+    </div>
+    <div style="width:1px; background:var(--bd); height:40px;"></div>
+    <div class="ctx-item">
+      <div class="ctx-num">44</div>
+      <div class="ctx-lbl">Utilisateurs actifs sur 47 inscrits</div>
+    </div>
+    <div style="width:1px; background:var(--bd); height:40px;"></div>
+    <div class="ctx-item">
+      <div class="ctx-num">~40</div>
+      <div class="ctx-lbl">Professeurs impliqués sur le terrain Annecy</div>
+    </div>
+    <div style="flex:1; font-size:11px; font-weight:300; color:var(--faint); font-style:italic; padding-left:16px;">
+      Un orthopédagogue, une agence de communication et la direction d'un lycée d'Annecy ont spontanément validé et rejoint le projet.
+    </div>
+  </div>
+</section>
+
+<!-- ══ CTA ══ -->
+<section id="cta">
+  <div class="eye reveal">06 · Ce qu'on vous propose</div>
+  <div class="rule"></div>
+  <div class="cta-headline reveal">SAINT-MICHEL<br>EN AVANT.</div>
+  <div class="section-lead reveal">Votre lycée peut rejoindre LYNK dès maintenant. Deux options selon votre ambition.</div>
+
+  <div class="cta-options reveal">
+    <div class="cta-option">
+      <div class="cta-option-num">OPTION 01</div>
+      <div class="cta-option-title">Lycée testeur officiel</div>
+      <div class="cta-option-body">
+        Vos élèves accèdent à LYNK en avant-première, dans des <strong>conditions réelles mais encadrées</strong>.<br><br>
+        → Accès à l'app pour une classe pilote<br>
+        → Suivi terrain par notre équipe<br>
+        → Retours intégrés dans le produit final<br>
+        → <strong>Votre établissement cité comme lycée pionnier</strong>
+      </div>
+    </div>
+    <div class="cta-option">
+      <div class="cta-option-num">OPTION 02</div>
+      <div class="cta-option-title">Déploiement lycée — acquisition directe</div>
+      <div class="cta-option-body">
+        Saint-Michel adopte LYNK à l'échelle de l'établissement. <strong>Un stylo par élève, l'app activée.</strong><br><br>
+        → Tarif lycée négocié par volume<br>
+        → Formation des élèves incluse<br>
+        → Tableau de bord usage pour la direction<br>
+        → <strong>Partenariat long terme prioritaire</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="cta-contact reveal">
+    <div class="cta-contact-item">
+      <div class="cta-contact-label">Projet</div>
+      <div class="cta-contact-value">LYNK — Écosystème éducatif NFC + IA</div>
+    </div>
+    <div style="width:1px; background:var(--bd); height:36px;"></div>
+    <div class="cta-contact-item">
+      <div class="cta-contact-label">Stade</div>
+      <div class="cta-contact-value">Phase 2 · Expansion lycées</div>
+    </div>
+    <div style="width:1px; background:var(--bd); height:36px;"></div>
+    <div class="cta-contact-item">
+      <div class="cta-contact-label">Partenaire industriel</div>
+      <div class="cta-contact-value">Partenaire industriel de référence</div>
+    </div>
+    <div style="width:1px; background:var(--bd); height:36px;"></div>
+    <div class="cta-contact-item">
+      <div class="cta-contact-label">Prochaine étape</div>
+      <div class="cta-contact-value">Échange pour définir la modalité</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">LYNK</div>
+  <div class="footer-copy">Réinventer la manière d'apprendre · 2026</div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); }
+    });
+  }, { threshold: 0.08 });
+  reveals.forEach(r => observer.observe(r));
+</script>
+</body>
+</html>
